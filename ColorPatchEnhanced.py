@@ -61,7 +61,6 @@ if __name__ == '__main__':
         '''
         
         ## Inversion of the Appearance Model
-        '''
         # Step 1 Calculate t from C and J
         t = (model.chroma / np.sqrt(model.lightness/100) / (1.64-0.29**model.n)**0.73)**(10/9)
         # Step 2 Calculate et from h
@@ -80,9 +79,30 @@ if __name__ == '__main__':
         La = (tmp4 + 32*tmp5) / 61
         Ma = -(tmp5 - La)
         Sa = -(tmp3 - La - Ma) / 2
-        #La = (tmp4 + 8*tmp5) / 37 # L + 24/37M # wrong answer
-        #Ma = -(tmp5 - La) # 61/37M # wrong answer
-        #Sa = -(tmp3 - La - Ma) / 2 # 24/37M + S # wrong answer
+        delta = np.min([La, Ma, Sa])
+        print(La, Ma, Sa)
+        if delta < 4:
+            if La < 7.5: La += delta * 0.6
+            else: La += delta * 0.4
+            if Ma < 7.5: Ma += delta * 0.6
+            else: Ma += delta * 0.4
+            if Sa < 7.5: Sa += delta * 0.6
+            else: Sa += delta * 0.4
+        elif delta < 6:
+            if La < 7.5: La += delta * 0.3
+            else: La += delta * 0.2
+            if Ma < 7.5: Ma += delta * 0.3
+            else: Ma += delta * 0.2
+            if Sa < 7.5: Sa += delta * 0.3
+            else: Sa += delta * 0.2
+        elif delta > 10:
+            La *= 0.95
+            Ma *= 0.95
+            Sa *= 0.95
+        print(La, Ma, Sa)
+        #Laa = (tmp4 + 8*tmp5) / 37 # L + 24/37M # wrong answer
+        #Maa = -(tmp5 - La) # 61/37M # wrong answer
+        #Saa = -(tmp3 - La - Ma) / 2 # 24/37M + S # wrong answer
         # Step 6 Use the inverse nonlinearity to compute LMS2
         Fl = model.f_l
         L2 = 100 * ((27.13 * (La-0.1)) / (400-La+0.1))**(100/42) / Fl
@@ -94,6 +114,7 @@ if __name__ == '__main__':
         LMSc = np.matmul(M_CAT, np.matmul(M_Hinv, np.array([L2, M2, S2])))
         '''
         LMSc = model.lmsc
+        '''
         # Step 8 Invert the chromatic adaptation transform to compute LMS
         M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
         white = np.matmul(Ml, np.array([1.0**gamma_rl, 1.0**gamma_gl, 1.0**gamma_bl]))

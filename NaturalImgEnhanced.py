@@ -22,7 +22,7 @@ if __name__ == '__main__':
     Ml = np.array([[4.61, 3.35, 1.78], [2.48, 7.16, 0.79], [0.28, 1.93, 8.93]])
 
     for file in allFiles:
-        #if '01' not in file: continue
+        #if '06' not in file: continue
         if 'original' not in file: continue
         print('=== start', file, 'image ===')
 
@@ -31,18 +31,11 @@ if __name__ == '__main__':
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imgEnhanced = np.ones(img.shape)
 
-        visited = {}
         m, n, o = img.shape
         for i in range(m):
             for j in range(n):
                 ## Device Characteristic Modeling
                 rgb = img[i, j, :].astype(np.float16) / 255
-                if tuple(rgb) in visited:
-                    JC = 0 #model.lightness * model.chroma / 10000
-                    imgEnhanced[i, j, 0] = (1 - JC) * visited[tuple(rgb)][2] + JC * rgb[0]
-                    imgEnhanced[i, j, 1] = (1 - JC) * visited[tuple(rgb)][1] + JC * rgb[1]
-                    imgEnhanced[i, j, 2] = (1 - JC) * visited[tuple(rgb)][0] + JC * rgb[2]
-                    continue
                 xyz = np.matmul(Mf, np.array([rgb[0]**gamma_rf, rgb[1]**gamma_gf, rgb[2]**gamma_bf]))
                 white = np.matmul(Mf, np.array([1.0**gamma_rf, 1.0**gamma_gf, 1.0**gamma_bf]))
 
@@ -68,7 +61,6 @@ if __name__ == '__main__':
                 '''
                 
                 ## Inversion of the Appearance Model
-                '''
                 # Step 1 Calculate t from C and J
                 t = (model.chroma / np.sqrt(model.lightness/100) / (1.64-0.29**model.n)**0.73)**(10/9)
                 # Step 2 Calculate et from h
@@ -87,6 +79,24 @@ if __name__ == '__main__':
                 La = (tmp4 + 32*tmp5) / 61
                 Ma = -(tmp5 - La)
                 Sa = -(tmp3 - La - Ma) / 2
+                delta = np.min([La, Ma, Sa])
+                if delta < 4:
+                    if La < 7.5: La += delta * 0.6
+                    else: La += delta * 0.4
+                    if Ma < 7.5: Ma += delta * 0.6
+                    else: Ma += delta * 0.4
+                    if Sa < 7.5: Sa += delta * 0.6
+                    else: Sa += delta * 0.4
+                elif delta < 6:
+                    if La < 7.5: La += delta * 0.3
+                    else: La += delta * 0.2
+                    if Ma < 7.5: Ma += delta * 0.3
+                    else: Ma += delta * 0.2
+                    if Sa < 7.5: Sa += delta * 0.3
+                    else: Sa += delta * 0.2
+                #La = (tmp4 + 8*tmp5) / 37 # L + 24/37M # wrong answer
+                #Ma = -(tmp5 - La) # M + 24/37M # wrong answer
+                #Sa = -(tmp3 - La - Ma) / 2 # S + 24/37M # wrong answer
                 # Step 6 Use the inverse nonlinearity to compute LMS2
                 Fl = model.f_l
                 L2 = 100 * ((27.13 * (La-0.1)) / (400-La+0.1))**(100/42) / Fl
@@ -98,6 +108,7 @@ if __name__ == '__main__':
                 LMSc = np.matmul(M_CAT, np.matmul(M_Hinv, np.array([L2, M2, S2])))
                 '''
                 LMSc = model.lmsc
+                '''
                 # Step 8 Invert the chromatic adaptation transform to compute LMS
                 M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
                 white = np.matmul(Ml, np.array([1.0**gamma_rl, 1.0**gamma_gl, 1.0**gamma_bl]))
@@ -122,9 +133,6 @@ if __name__ == '__main__':
                 imgEnhanced[i, j, 0] = (1 - JC) * RGBc[2] + JC * rgb[0]
                 imgEnhanced[i, j, 1] = (1 - JC) * RGBc[1] + JC * rgb[1]
                 imgEnhanced[i, j, 2] = (1 - JC) * RGBc[0] + JC * rgb[2]
-
-                ## Record Dynamic Programming
-                visited[tuple(rgb)] = RGBc
                 
         ## Show Results
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
