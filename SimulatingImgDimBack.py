@@ -23,7 +23,7 @@ if __name__ == '__main__':
     Ml = np.array([[4.61, 3.35, 1.78], [2.48, 7.16, 0.79], [0.28, 1.93, 8.93]])
 
     for file in allFiles:
-        #if '01' not in file: continue
+        if 'original' not in file: continue
         print('=== start', file, 'image ===')
         img = cv2.imread(os.path.join(imgDir, file))
         imgDim = np.ones(img.shape, dtype=np.uint8)
