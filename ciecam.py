@@ -48,6 +48,9 @@ class CIECAM02(object):
     @property
     def Fl(self): return self.f_l
 
+    @property
+    def lmsc(self): return self.LMSc
+
     M_CAT02 = numpy.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
     M_CAT02_inv = numpy.linalg.inv(M_CAT02)
     M_HPE = numpy.array([[0.38971, 0.68898, -0.07868], [-0.22981, 1.18340, 0.04641], [0, 0, 1]])
@@ -83,7 +86,8 @@ class CIECAM02(object):
         self.n_bb = self.n_cb = 0.725 * self._n ** -0.2
         z = 1.48 + numpy.sqrt(self._n)
 
-        rgb_a, rgb_aw = self._compute_adaptation(xyz, xyz_w, self.f_l, d)
+        rgb_c, rgb_cw, rgb_p, rgb_wp, rgb_a, rgb_aw = self._compute_adaptation(xyz, xyz_w, self.f_l, d)
+        self.LMSc = rgb_c
 
         r_a, g_a, b_a = rgb_a
         r_aw, g_aw, b_aw = rgb_aw
@@ -140,7 +144,7 @@ class CIECAM02(object):
         rgb_ap = cls._compute_nonlinearities(f_l, rgb_p)
         rgb_awp = cls._compute_nonlinearities(f_l, rgb_wp)
 
-        return rgb_ap, rgb_awp
+        return rgb_c, rgb_cw, rgb_p, rgb_wp, rgb_ap, rgb_awp
 
     @staticmethod
     def _xyz_to_rgb(xyz):
