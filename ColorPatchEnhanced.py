@@ -80,6 +80,9 @@ if __name__ == '__main__':
         La = (tmp4 + 32*tmp5) / 61
         Ma = -(tmp5 - La)
         Sa = -(tmp3 - La - Ma) / 2
+        #La = (tmp4 + 8*tmp5) / 37 # L + 24/37M # wrong answer
+        #Ma = -(tmp5 - La) # 61/37M # wrong answer
+        #Sa = -(tmp3 - La - Ma) / 2 # 24/37M + S # wrong answer
         # Step 6 Use the inverse nonlinearity to compute LMS2
         Fl = model.f_l
         L2 = 100 * ((27.13 * (La-0.1)) / (400-La+0.1))**(100/42) / Fl
