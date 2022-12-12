@@ -17,8 +17,8 @@ opencv-python==4.6.0.66
 
 ## Results
 
-![](https://i.imgur.com/Ucdlxnk.png)
+![](https://i.imgur.com/VtxYD1z.png)
 
-![](https://i.imgur.com/dFyMZLL.png)
+![](https://i.imgur.com/tPkobSG.png)
 
-![](https://i.imgur.com/NQkgcez.jpg)
+![](https://i.imgur.com/CerMgaU.jpg)
