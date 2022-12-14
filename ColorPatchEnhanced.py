@@ -105,6 +105,7 @@ if __name__ == '__main__':
         RGB2 = np.nan_to_num(RGB2, nan=0.0)
         # Step 2 Clipping the RGB values with a hard threshold
         RGBc = np.clip(RGB2, 0, 1)
+        # Stpe 3 Tone and color correction
         RGBc = np.log((10-1)*RGBc+1) / np.log(10)
 
         ## Color Enhancement Image
