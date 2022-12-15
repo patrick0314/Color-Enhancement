@@ -33,21 +33,20 @@ if __name__ == '__main__':
         img = cv2.imread(imgPath)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imgEnhanced = np.ones(img.shape)
-        JCs = np.ones(img.shape[:2])
 
+        JCs = np.ones(img.shape[:2])
         visited = {}
         m, n, o = img.shape
-        img2 = np.pad(img, ((25, 25), (25, 25), (0, 0)), 'edge')
-        for i in range(25, m+25):
-            for j in range(25, n+25):
+        for i in range(m):
+            for j in range(n):
                 ## Device Characteristic Modeling
-                rgb = img2[i, j, :].astype(np.float16) / 255
+                rgb = img[i, j, :].astype(np.float16) / 255
                 if tuple(rgb) in visited:
-                    imgEnhanced[i-25, j-25, :] = visited[tuple(rgb)][::-1]
+                    imgEnhanced[i, j, :] = visited[tuple(rgb)][::-1]
                     continue
 
                 xyz = np.matmul(Mf, np.array([rgb[0]**gamma_rf, rgb[1]**gamma_gf, rgb[2]**gamma_bf]))
-                white = np.matmul(Mf, np.array([1.0**gamma_rf, 1.0**gamma_gf, 1.0**gamma_bf]))
+                white = np.matmul(Mf, np.array([1.0, 1.0, 1.0]))
 
                 ## Color Reproduction
                 # Step 1 determining parameters
@@ -60,13 +59,13 @@ if __name__ == '__main__':
 
                 # Step 2-5 use python library
                 model = CIECAM02(xyz[0], xyz[1], xyz[2], white[0], white[1], white[2], Y_b, L_a, c, N_c, F)
-                JCs[i-25, j-25] = model.lightness * model.chroma
+                JCs[i, j] = model.lightness * model.chroma
                 
                 ## Inversion of the Appearance Model
                 LMSc = model.lmsc
                 # Step 8 Invert the chromatic adaptation transform to compute LMS
                 M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
-                white = np.matmul(Ml, np.array([1.0**gamma_rl, 1.0**gamma_gl, 1.0**gamma_bl]))
+                white = np.matmul(Ml, np.array([1.0, 1.0, 1.0]))
                 LMSw = np.matmul(M_CAT, white)
                 LMS = LMSc / (100*D/LMSw + 1 - D)
                 # Step 8 Invert the chromatic adaptation transform to compute XYZ
@@ -82,7 +81,7 @@ if __name__ == '__main__':
                 RGBc = np.clip(RGB2, 0, 1)
 
                 ## Color Enhancement Image
-                imgEnhanced[i-25, j-25, :] = RGBc[::-1]
+                imgEnhanced[i, j, :] = RGBc[::-1]
 
                 ## Save Dynamic Programming
                 visited[tuple(rgb)] = RGBc

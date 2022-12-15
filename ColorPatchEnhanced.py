@@ -7,8 +7,9 @@ import numpy as np
 
 from ciecam import CIECAM02
 
-
 if __name__ == '__main__':
+    np.seterr(invalid='ignore')
+
     ## Load Input Image
     imgDir = 'results_tmm/color patch'
     outDir = 'results_tmm/color patch results'
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         ## Device Characteristic Modeling
         sample = img[0, 0, :].astype(np.float16) / 255
         xyz = np.matmul(Mf, np.array([sample[0]**gamma_rf, sample[1]**gamma_gf, sample[2]**gamma_bf]))
-        white = np.matmul(Mf, np.array([1.0**gamma_rf, 1.0**gamma_gf, 1.0**gamma_bf]))
+        white = np.matmul(Mf, np.array([1.0, 1.0, 1.0]))
 
         ## Color Reproduction
         # Step 1 determining parameters
@@ -52,14 +53,12 @@ if __name__ == '__main__':
         LMSc = model.lmsc
         # Step 8 Invert the chromatic adaptation transform to compute LMS
         M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
-        white = np.matmul(Ml, np.array([1.0**gamma_rl, 1.0**gamma_gl, 1.0**gamma_bl]))
+        white = np.matmul(Ml, np.array([1.0, 1.0, 1.0]))
         LMSw = np.matmul(M_CAT, white)
-        L = LMSc[0] / (100*D/LMSw[0] + 1 - D)
-        M = LMSc[1] / (100*D/LMSw[1] + 1 - D)
-        S = LMSc[2] / (100*D/LMSw[2] + 1 - D)
+        LMS = LMSc / (100*D/LMSw + 1 - D)
         # Step 8 Invert the chromatic adaptation transform to compute XYZ
         M_CATinv = np.linalg.inv(M_CAT)
-        xyze = np.matmul(M_CATinv, np.array([L, M, S]))
+        xyze = np.matmul(M_CATinv, LMS)
 
         ## Post Gamut Mapping
         # Step 1 Convert the XYZ values to RGB values

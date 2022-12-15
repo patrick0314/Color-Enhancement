@@ -7,8 +7,9 @@ import numpy as np
 
 from ciecam import CIECAM02
 
-
 if __name__ == '__main__':
+    np.seterr(invalid='ignore')
+    
     ## Load Input Image
     imgDir = 'results_tmm/natural image'
     outDir = 'results_tmm/natural image results'
@@ -33,21 +34,19 @@ if __name__ == '__main__':
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imgEnhanced = np.ones(img.shape)
 
+        JCs = np.ones(img.shape[:2])
         visited = {}
         m, n, o = img.shape
         for i in range(m):
             for j in range(n):
                 ## Device Characteristic Modeling
-                rgb = img[i, j, :].astype(np.float16) / 255
-                if tuple(rgb) in visited:
-                    JC = 0.2
-                    imgEnhanced[i, j, 0] = (1 - JC) * visited[tuple(rgb)][2] + JC * rgb[2]
-                    imgEnhanced[i, j, 1] = (1 - JC) * visited[tuple(rgb)][1] + JC * rgb[1]
-                    imgEnhanced[i, j, 2] = (1 - JC) * visited[tuple(rgb)][0] + JC * rgb[0]
+                sample = img[i, j, :].astype(np.float16) / 255
+                if tuple(sample) in visited:
+                    imgEnhanced[i, j, :] = visited[tuple(sample)][::-1]
                     continue
 
-                xyz = np.matmul(Mf, np.array([rgb[0]**gamma_rf, rgb[1]**gamma_gf, rgb[2]**gamma_bf]))
-                white = np.matmul(Mf, np.array([1.0**gamma_rf, 1.0**gamma_gf, 1.0**gamma_bf]))
+                xyz = np.matmul(Mf, np.array([sample[0]**gamma_rf, sample[1]**gamma_gf, sample[2]**gamma_bf]))
+                white = np.matmul(Mf, np.array([1.0, 1.0, 1.0]))
 
                 ## Color Reproduction
                 # Step 1 determining parameters
@@ -60,19 +59,18 @@ if __name__ == '__main__':
 
                 # Step 2-5 use python library
                 model = CIECAM02(xyz[0], xyz[1], xyz[2], white[0], white[1], white[2], Y_b, L_a, c, N_c, F)
+                JCs[i, j] = model.lightness * model.chroma
 
                 ## Inversion of the Appearance Model
                 LMSc = model.lmsc
                 # Step 8 Invert the chromatic adaptation transform to compute LMS
                 M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
-                white = np.matmul(Ml, np.array([1.0**gamma_rl, 1.0**gamma_gl, 1.0**gamma_bl]))
+                white = np.matmul(Ml, np.array([1.0, 1.0, 1.0]))
                 LMSw = np.matmul(M_CAT, white)
-                L = LMSc[0] / (100*D/LMSw[0] + 1 - D)
-                M = LMSc[1] / (100*D/LMSw[1] + 1 - D)
-                S = LMSc[2] / (100*D/LMSw[2] + 1 - D)
+                LMS = LMSc / (100*D/LMSw + 1 - D)
                 # Step 8 Invert the chromatic adaptation transform to compute XYZ
                 M_CATinv = np.linalg.inv(M_CAT)
-                xyze = np.matmul(M_CATinv, np.array([L, M, S]))
+                xyze = np.matmul(M_CATinv, LMS)
 
                 ## Post Gamut Mapping
                 # Step 1 Convert the XYZ values to RGB values
@@ -82,17 +80,19 @@ if __name__ == '__main__':
                 # Step 2 Clipping the RGB values with a hard threshold
                 RGBc = np.clip(RGB2, 0, 1)
                 # Stpe 3 Tone and color correction
-                RGBc = np.log((10-1)*RGBc+1) / np.log(10)
 
                 ## Color Enhancement Image
-                JC = 0.2
-                imgEnhanced[i, j, 0] = (1 - JC) * RGBc[2] + JC * rgb[2]
-                imgEnhanced[i, j, 1] = (1 - JC) * RGBc[1] + JC * rgb[1]
-                imgEnhanced[i, j, 2] = (1 - JC) * RGBc[0] + JC * rgb[0]
+                imgEnhanced[i, j, :] = RGBc[::-1]
 
                 ## Save Dynamic Programming
-                visited[tuple(rgb)] = RGBc
-                
+                visited[tuple(sample)] = RGBc
+
+        JCs = JCs / np.max(JCs)
+        JC = np.mean(JCs)
+        imgEnhanced[:, :, 0] = (1-JC) * imgEnhanced[:, :, 0] + JC * img[:, :, 2].astype(np.float16) / 255
+        imgEnhanced[:, :, 1] = (1-JC) * imgEnhanced[:, :, 1] + JC * img[:, :, 1].astype(np.float16) / 255
+        imgEnhanced[:, :, 2] = (1-JC) * imgEnhanced[:, :, 2] + JC * img[:, :, 0].astype(np.float16) / 255
+
         ## Show Results
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         imgEnhanced = (imgEnhanced * 255).astype(np.uint8)
