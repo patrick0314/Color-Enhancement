@@ -16,9 +16,3 @@ opencv-python==4.6.0.66
 * [SimulatingImgDimBack.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/SimulatingImgDimBack.py) can show the img & enhanced img with dim backlight and save the results in the folder - [results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/results_tmm)
 
 ## Results
-
-![](https://i.imgur.com/VtxYD1z.png)
-
-![](https://i.imgur.com/tPkobSG.png)
-
-![](https://i.imgur.com/CerMgaU.jpg)
