@@ -61,11 +61,26 @@ if __name__ == '__main__':
                 model = CIECAM02(xyz[0], xyz[1], xyz[2], white[0], white[1], white[2], Y_b, L_a, c, N_c, F)
                 JCs[i, j] = model.lightness * model.chroma
 
+                h = model.hue_angle
+                J = model.lightness
+                C = model.chroma
+
                 ## Inversion of the Appearance Model
-                LMSc = model.lmsc
+                white = np.matmul(Ml, np.array([1.0, 1.0, 1.0]))
+                # Step 1 Calculate t from C and J
+
+                # Step 3 Calculate A from Aw and J
+
+                # Step 4 Calculate a and b from t, h and A
+
+                # Step 5 Calculate La, Ma and Sa from A, a and b
+
+                # Step 6 Use the inverse nonlinearity to compute L2, M2 and S2
+
+                # Step 7 Convert to Lc, Mc and Sc vis linear transformer
+
                 # Step 8 Invert the chromatic adaptation transform to compute LMS
                 M_CAT = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
-                white = np.matmul(Ml, np.array([1.0, 1.0, 1.0]))
                 LMSw = np.matmul(M_CAT, white)
                 LMS = LMSc / (100*D/LMSw + 1 - D)
                 # Step 8 Invert the chromatic adaptation transform to compute XYZ
@@ -79,7 +94,6 @@ if __name__ == '__main__':
                 RGB2 = np.nan_to_num(RGB2, nan=0.0)
                 # Step 2 Clipping the RGB values with a hard threshold
                 RGBc = np.clip(RGB2, 0, 1)
-                # Stpe 3 Tone and color correction
 
                 ## Color Enhancement Image
                 imgEnhanced[i, j, :] = RGBc[::-1]
