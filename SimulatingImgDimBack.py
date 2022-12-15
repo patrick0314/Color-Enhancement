@@ -49,5 +49,5 @@ if __name__ == '__main__':
         '''
 
         # Save Results
-        outPath = os.path.join(outDir, file)
+        outPath = os.path.join(outDir, file[:2]+file[-4:])
         cv2.imwrite(outPath, cv2.vconcat([img, imgDim]))

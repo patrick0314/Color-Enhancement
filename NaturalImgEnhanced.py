@@ -1,4 +1,6 @@
 import os
+import sys
+import time
 
 import cv2
 import numpy as np
@@ -22,6 +24,7 @@ if __name__ == '__main__':
     Ml = np.array([[4.61, 3.35, 1.78], [2.48, 7.16, 0.79], [0.28, 1.93, 8.93]])
 
     for file in allFiles:
+        startTime = time.time()
         if 'original' not in file: continue
         print('=== start', file, 'image ===')
 
@@ -138,4 +141,6 @@ if __name__ == '__main__':
         '''
 
         ## Save Results
-        cv2.imwrite(os.path.join(outDir, file), cv2.hconcat([img, imgEnhanced]))
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_v1'+file[-4:]), imgEnhanced)
+        endTime = time.time()
+        print('cost: ', endTime-startTime)

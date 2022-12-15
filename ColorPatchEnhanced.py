@@ -1,4 +1,5 @@
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -125,4 +126,4 @@ if __name__ == '__main__':
         '''
 
         ## Save Results
-        cv2.imwrite(os.path.join(outDir, file), cv2.hconcat([img, EnhancedImg]))
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_v1'+file[-4:]), EnhancedImg)
