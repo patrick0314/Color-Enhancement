@@ -101,4 +101,4 @@ if __name__ == '__main__':
         ## Save Results
         cv2.imwrite(os.path.join(outDir, file[:2]+'_v2'+file[-4:]), imgEnhanced)
         endTime = time.time()
-        print('cost: ', endTime-startTime)
+        print('cost:', endTime-startTime, 'sec')
