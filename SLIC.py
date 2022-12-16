@@ -71,7 +71,8 @@ if __name__ == '__main__':
 
         imgEnhanced *= 255
         imgEnhanced = imgEnhanced.astype(np.uint8)
+        res = mark_boundaries(imgEnhanced, segments)
 
-        cv2.imwrite(os.path.join(outDir, file[:2]+'_v3'+file[-4:]), imgEnhanced)
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_v3'+file[-4:]), res*255)
         endTime = time.time()
         print('cost:', endTime-startTime, 'sec')
