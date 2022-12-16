@@ -11,8 +11,8 @@ if __name__ == '__main__':
     np.seterr(invalid='ignore')
 
     ## Load Input Image
-    imgDir = 'results_tmm/natural image'
-    outDir = 'results_tmm/natural image results'
+    imgDir = 'images/natural image'
+    outDir = 'images/natural image results'
     allFiles = os.listdir(imgDir)
 
     for file in allFiles:
@@ -34,6 +34,6 @@ if __name__ == '__main__':
         imgEnhanced *= 255
         imgEnhanced = imgEnhanced.astype(np.uint8)
 
-        cv2.imwrite(os.path.join(outDir, file[:2]+'_v3'+file[-4:]), imgEnhanced)
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_v2'+file[-4:]), imgEnhanced)
         endTime = time.time()
         print('cost:', endTime-startTime, 'sec')

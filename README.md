@@ -5,6 +5,8 @@
 ```
 numpy==1.23.5
 opencv-python==4.6.0.66
+colour==0.1.5
+colour-science==0.4.2
 ```
 
 ## Usage

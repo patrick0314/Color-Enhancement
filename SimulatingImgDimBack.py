@@ -1,4 +1,5 @@
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -9,8 +10,10 @@ def DeviceCharacteristicModeling(M, R, gr, gg, gb):
     return res
     
 if __name__ == '__main__':
-    imgDir = 'results_tmm/natural image results'
-    outDir = 'results_tmm/results'
+    np.seterr(invalid='ignore')
+
+    imgDir = 'images/natural image results'
+    outDir = 'images/results'
     allFiles = os.listdir(imgDir)
 
     ## The Estimated Display Parameters
@@ -22,32 +25,40 @@ if __name__ == '__main__':
     gamma_rl, gamma_gl, gamma_bl = 2.2212, 2.1044, 2.1835
     Ml = np.array([[4.61, 3.35, 1.78], [2.48, 7.16, 0.79], [0.28, 1.93, 8.93]])
 
+    fileDic = {}
     for file in allFiles:
-        if 'v3' not in file: continue
-        print('=== start', file, 'image ===')
-        img = cv2.imread(os.path.join(imgDir, file))
-        imgDim = np.ones(img.shape, dtype=np.uint8)
+        print(file)
+        if file[:2] not in fileDic: fileDic[file[:2]] = [file]
+        else: fileDic[file[:2]].append(file)
+    print(fileDic)
+    sys.exit()
 
-        m, n, o = img.shape
-        for i in range(m):
-            for j in range(n):
-                # Change to XYZ with Low-backlight Display Model
-                bgr = img[i, j, :].astype(np.float16) / 255
-                xyz = DeviceCharacteristicModeling(Ml, bgr, gamma_rl, gamma_gl, gamma_bl)
-                # Chnage to RGB with Full-backlight Dispaly Model
-                xyzinv = np.matmul(np.linalg.inv(Mf), xyz)
-                bgr[0] = xyzinv[2] ** (1 / gamma_bl)
-                bgr[1] = xyzinv[1] ** (1 / gamma_bl)
-                bgr[2] = xyzinv[0] ** (1 / gamma_bl)
+    for files in fileDic.keys():
+        print('=== start', files, 'image ===')
+        first = True
+        for file in fileDic[files]:
+            img = cv2.imread(os.path.join(imgDir, file))
+            imgDim = np.ones(img.shape, dtype=np.uint8)
 
-                imgDim[i, j, :] = (bgr * 255).astype(np.uint8)
+            m, n, o = img.shape
+            for i in range(m):
+                for j in range(n):
+                    # Change to XYZ with Low-backlight Display Model
+                    bgr = img[i, j, :].astype(np.float16) / 255
+                    xyz = DeviceCharacteristicModeling(Ml, bgr, gamma_rl, gamma_gl, gamma_bl)
+                    # Chnage to RGB with Full-backlight Dispaly Model
+                    xyzinv = np.matmul(np.linalg.inv(Mf), xyz)
+                    bgr[0] = xyzinv[2] ** (1 / gamma_bl)
+                    bgr[1] = xyzinv[1] ** (1 / gamma_bl)
+                    bgr[2] = xyzinv[0] ** (1 / gamma_bl)
 
-        # Show Results
-        '''
-        cv2.imshow('Comparison', cv2.vconcat([img, imgDim]))
-        cv2.waitKey(0)
-        '''
+                    imgDim[i, j, :] = (bgr * 255).astype(np.uint8)
+            
+            res = cv2.vconcat([img, imgDim])
+        
+            if first: ress = res; first = False
+            else: ress = cv2.hconcat([ress, res])
 
         # Save Results
         outPath = os.path.join(outDir, file[:2]+file[-4:])
-        cv2.imwrite(outPath, cv2.vconcat([img, imgDim]))
+        cv2.imwrite(outPath, ress)

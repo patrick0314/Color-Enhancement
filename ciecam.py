@@ -1,4 +1,145 @@
-import numpy
+import numpy as np
+from colour.algebra import sdiv, sdiv_mode
+from colour.utilities import as_float_array, ones, tsplit, tstack, zeros
+
+
+def opponent_colour_dimensions_inverse(P_n, h):
+    """
+    Return opponent colour dimensions from given points :math:`P_n` and hue
+    :math:`h` in degrees for inverse *CIECAM02* implementation.
+
+    Parameters
+    ----------
+    P_n
+        Points :math:`P_n`.
+    h
+        Hue :math:`h` in degrees.
+
+    Returns
+    -------
+    :class:`numpy.ndarray`
+        Opponent colour dimensions.
+
+    Examples
+    --------
+    >>> P_n = np.array([30162.89081534, 24.23720547, 1.05000000])
+    >>> h = -140.95156734
+    >>> opponent_colour_dimensions_inverse(P_n, h)  # doctest: +ELLIPSIS
+    array([-0.0006241..., -0.0005062...])
+    """
+
+    P_1, P_2, P_3 = tsplit(P_n)
+    hr = np.radians(h)
+
+    sin_hr = np.sin(hr)
+    cos_hr = np.cos(hr)
+
+    with sdiv_mode():
+        cos_hr_sin_hr = sdiv(cos_hr, sin_hr)
+        sin_hr_cos_hr = sdiv(sin_hr, cos_hr)
+
+        P_4 = sdiv(P_1, sin_hr)
+        P_5 = sdiv(P_1, cos_hr)
+
+    n = P_2 * (2 + P_3) * (460 / 1403)
+
+    a = zeros(hr.shape)
+    b = zeros(hr.shape)
+
+    abs_sin_hr_gt_cos_hr = np.abs(sin_hr) >= np.abs(cos_hr)
+    abs_sin_hr_lt_cos_hr = np.abs(sin_hr) < np.abs(cos_hr)
+
+    b = np.where(
+        abs_sin_hr_gt_cos_hr,
+        n
+        / (
+            P_4
+            + (2 + P_3) * (220 / 1403) * cos_hr_sin_hr
+            - (27 / 1403)
+            + P_3 * (6300 / 1403)
+        ),
+        b,
+    )
+
+    a = np.where(
+        abs_sin_hr_gt_cos_hr,
+        b * cos_hr_sin_hr,
+        a,
+    )
+
+    a = np.where(
+        abs_sin_hr_lt_cos_hr,
+        n
+        / (
+            P_5
+            + (2 + P_3) * (220 / 1403)
+            - ((27 / 1403) - P_3 * (6300 / 1403)) * sin_hr_cos_hr
+        ),
+        a,
+    )
+
+    b = np.where(
+        abs_sin_hr_lt_cos_hr,
+        a * sin_hr_cos_hr,
+        b,
+    )
+
+    ab = tstack([a, b])
+
+    return ab
+
+def P(N_c, N_cb, e_t, t, A, N_bb):
+    """
+    Return the points :math:`P_1`, :math:`P_2` and :math:`P_3`.
+
+    Parameters
+    ----------
+    N_c
+        Surround chromatic induction factor :math:`N_{c}`.
+    N_cb
+        Chromatic induction factor :math:`N_{cb}`.
+    e_t
+        Eccentricity factor :math:`e_t`.
+    t
+        Temporary magnitude quantity :math:`t`.
+    A
+        Achromatic response  :math:`A` for the stimulus.
+    N_bb
+        Chromatic induction factor :math:`N_{bb}`.
+
+    Returns
+    -------
+    :class:`numpy.ndarray`
+        Points :math:`P`.
+
+    Examples
+    --------
+    >>> N_c = 1.0
+    >>> N_cb = 1.00030400456
+    >>> e_t = 1.174005472851914
+    >>> t = 0.149746202921
+    >>> A = 23.9394809667
+    >>> N_bb = 1.00030400456
+    >>> P(N_c, N_cb, e_t, t, A, N_bb)  # doctest: +ELLIPSIS
+    array([  3.0162890...e+04,   2.4237205...e+01,   1.0500000...e+00])
+    """
+
+    N_c = as_float_array(N_c)
+    N_cb = as_float_array(N_cb)
+    e_t = as_float_array(e_t)
+    t = as_float_array(t)
+    A = as_float_array(A)
+    N_bb = as_float_array(N_bb)
+
+    with sdiv_mode():
+        P_1 = sdiv((50000 / 13) * N_c * N_cb * e_t, t)
+
+    P_2 = A / N_bb + 0.305
+    P_3 = ones(P_1.shape) * (21 / 20)
+
+    P_n = tstack([P_1, P_2, P_3])
+
+    return P_n
 
 class CIECAM02(object):
     """
@@ -34,26 +175,18 @@ class CIECAM02(object):
     def b(self): return self._b
 
     @property
+    def t(self): return self._t
+
+    @property
     def n(self): return self._n
 
     @property
-    def et(self): return self.e_t
+    def aw(self): return self.a_w
 
-    @property
-    def A(self): return self._A
 
-    @property
-    def nbb(self): return self.n_bb
-
-    @property
-    def Fl(self): return self.f_l
-
-    @property
-    def lmsc(self): return self.LMSc
-
-    M_CAT02 = numpy.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
-    M_CAT02_inv = numpy.linalg.inv(M_CAT02)
-    M_HPE = numpy.array([[0.38971, 0.68898, -0.07868], [-0.22981, 1.18340, 0.04641], [0, 0, 1]])
+    M_CAT02 = np.array([[0.7328, 0.4296, -0.1624], [-0.7036, 1.6975, 0.0061], [0.0030, 0.0136, 0.9834]])
+    M_CAT02_inv = np.linalg.inv(M_CAT02)
+    M_HPE = np.array([[0.38971, 0.68898, -0.07868], [-0.22981, 1.18340, 0.04641], [0, 0, 1]])
 
     def __init__(self, x, y, z, x_w, y_w, z_w, y_b, l_a, c, n_c, f, d=False):
         """
@@ -71,8 +204,8 @@ class CIECAM02(object):
         :param d: Discount-the-Illuminant factor :math:`D`.
         """
 
-        xyz = numpy.array([x, y, z])
-        xyz_w = numpy.array([x_w, y_w, z_w])
+        xyz = np.array([x, y, z])
+        xyz_w = np.array([x_w, y_w, z_w])
 
         # Determine the degree of adaptation
         if not d: d = self._compute_degree_of_adaptation(f, l_a)
@@ -84,10 +217,9 @@ class CIECAM02(object):
         self.f_l = 0.2 * (k ** 4) * 5 * l_a + 0.1 * (1 - k ** 4) ** 2 * (5 * l_a) ** (1 / 3)
         self._n = y_b / y_w
         self.n_bb = self.n_cb = 0.725 * self._n ** -0.2
-        z = 1.48 + numpy.sqrt(self._n)
+        z = 1.48 + np.sqrt(self._n)
 
-        rgb_c, rgb_cw, rgb_p, rgb_wp, rgb_a, rgb_aw = self._compute_adaptation(xyz, xyz_w, self.f_l, d)
-        self.LMSc = rgb_c
+        rgb_a, rgb_aw = self._compute_adaptation(xyz, xyz_w, self.f_l, d)
 
         r_a, g_a, b_a = rgb_a
         r_aw, g_aw, b_aw = rgb_aw
@@ -97,29 +229,29 @@ class CIECAM02(object):
         self._b = (1 / 9) * (r_a + g_a - 2 * b_a)
 
         # Hue
-        self._h = 360 * numpy.arctan2(self._b, self._a) / (2 * numpy.pi)
-        self.e_t = (1 / 4) * (numpy.cos(2 + self._h * numpy.pi / 180) + 3.8)
+        self._h = 360 * np.arctan2(self._b, self._a) / (2 * np.pi)
+        self.e_t = (1 / 4) * (np.cos(2 + self._h * np.pi / 180) + 3.8)
 
         # Lightness
         self._A = self._compute_achromatic_response(r_a, g_a, b_a, self.n_bb)
-        a_w = self._compute_achromatic_response(r_aw, g_aw, b_aw, self.n_bb)
-        self._lightness = 100 * (self._A / a_w) ** (c * z)  # 16.24
+        self.a_w = self._compute_achromatic_response(r_aw, g_aw, b_aw, self.n_bb)
+        self._lightness = 100 * (self._A / self.a_w) ** (c * z)  # 16.24
 
         # Brightness
         # self._brightness = self.compute_brightness(self.lightness, surround, a_w, f_l)
-        self._brightness = (4 / c) * numpy.sqrt(self._lightness / 100) * (a_w + 4) * self.f_l ** 0.25
+        self._brightness = (4 / c) * np.sqrt(self._lightness / 100) * (self.a_w + 4) * self.f_l ** 0.25
 
         # Chroma
         # self.chroma = self.compute_chroma(rgb_a, self.lightness, surround, self.N_cb, e_t, self.a, self.b, n)
-        t = ((50000 / 13) * n_c * self.n_cb * self.e_t * numpy.sqrt((self._a ** 2) + (self._b ** 2))) / (
+        self._t = ((50000 / 13) * n_c * self.n_cb * self.e_t * np.sqrt((self._a ** 2) + (self._b ** 2))) / (
             rgb_a[0] + rgb_a[1] + (21 / 20) * rgb_a[2])
-        self._chroma = (t ** 0.9) * numpy.sqrt(self._lightness / 100) * ((1.64 - 0.29 ** self._n) ** 0.73)
+        self._chroma = (self._t ** 0.9) * np.sqrt(self._lightness / 100) * ((1.64 - 0.29 ** self._n) ** 0.73)
 
         # Colorfulness
         self._colorfulness = self.chroma * self.f_l ** 0.25
 
         # Saturation
-        self._saturation = 100 * numpy.sqrt(self._colorfulness / self._brightness)
+        self._saturation = 100 * np.sqrt(self._colorfulness / self._brightness)
 
         # Cartesian coordinates
         self.a_c, self.b_c = self._compute_cartesian_coordinates(self.chroma, self._h)
@@ -144,15 +276,15 @@ class CIECAM02(object):
         rgb_ap = cls._compute_nonlinearities(f_l, rgb_p)
         rgb_awp = cls._compute_nonlinearities(f_l, rgb_wp)
 
-        return rgb_c, rgb_cw, rgb_p, rgb_wp, rgb_ap, rgb_awp
+        return rgb_ap, rgb_awp
 
     @staticmethod
     def _xyz_to_rgb(xyz):
-        return numpy.dot(CIECAM02.M_CAT02, xyz)
+        return np.dot(CIECAM02.M_CAT02, xyz)
 
     @staticmethod
     def _rgb_to_xyz(rgb):
-        return numpy.dot(CIECAM02.M_CAT02_inv, rgb)
+        return np.dot(CIECAM02.M_CAT02_inv, rgb)
 
     @staticmethod
     def _white_adaption(rgb, rgb_w, d=1):
@@ -160,11 +292,11 @@ class CIECAM02(object):
 
     @staticmethod
     def _compute_degree_of_adaptation(surround_conditions, adapting_luminance):
-        return surround_conditions * (1 - (1 / 3.6) * numpy.exp((-adapting_luminance - 42) / 92))
+        return surround_conditions * (1 - (1 / 3.6) * np.exp((-adapting_luminance - 42) / 92))
 
     @staticmethod
     def _compute_hunt_pointer_estevez_fundamentals(rgb):
-        return numpy.dot(numpy.dot(CIECAM02.M_HPE, CIECAM02.M_CAT02_inv), rgb)
+        return np.dot(np.dot(CIECAM02.M_HPE, CIECAM02.M_CAT02_inv), rgb)
 
     @staticmethod
     def _compute_nonlinearities(f_l, rgb):
@@ -176,6 +308,6 @@ class CIECAM02(object):
 
     @staticmethod
     def _compute_cartesian_coordinates(value, hue):
-        a = value * numpy.cos(hue * numpy.pi / 180)  # 16.30
-        b = value * numpy.sin(hue * numpy.pi / 180)  # 16.31
+        a = value * np.cos(hue * np.pi / 180)  # 16.30
+        b = value * np.sin(hue * np.pi / 180)  # 16.31
         return a, b
