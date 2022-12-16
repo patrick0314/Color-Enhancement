@@ -14,7 +14,6 @@ if __name__ == '__main__':
     allFiles = os.listdir(imgDir)
 
     for file in allFiles:
-        if 'original' not in file: continue
         print('=== start', file, 'image ===')
         startTime = time.time()
 
