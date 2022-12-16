@@ -38,10 +38,6 @@ if __name__ == '__main__':
             for j in range(img.shape[1]):
                 ## Device Characteristic Modeling
                 sample = img[i, j, :].astype(np.float16) / 255
-                if tuple(sample) in visited:
-                    imgEnhanced[i, j, :] = visited[tuple(sample)][::-1]
-                    continue
-
                 xyz = np.matmul(Mf, np.array([sample[0]**gamma_rf, sample[1]**gamma_gf, sample[2]**gamma_bf]))
                 white = np.matmul(Mf, np.array([1.0, 1.0, 1.0]))
 
@@ -112,15 +108,10 @@ if __name__ == '__main__':
                 RGBc = np.clip(RGB2, 0, 1)
 
                 ## Color Enhancement Image
-                imgEnhanced[i, j, :] = RGBc[::-1]
-
-                ## Save Dynamic Programming
-                visited[tuple(sample)] = RGBc
-
-        JC = J * C / 10000
-        imgEnhanced[:, :, 0] = (1-JC) * imgEnhanced[:, :, 0] + JC * img[:, :, 2].astype(np.float16) / 255
-        imgEnhanced[:, :, 1] = (1-JC) * imgEnhanced[:, :, 1] + JC * img[:, :, 1].astype(np.float16) / 255
-        imgEnhanced[:, :, 2] = (1-JC) * imgEnhanced[:, :, 2] + JC * img[:, :, 0].astype(np.float16) / 255
+                JC = J * C / 10000
+                imgEnhanced[i, j, 0] = (1-JC) * RGBc[2] + JC * img[i, j, 2].astype(np.float16) / 255
+                imgEnhanced[i, j, 1] = (1-JC) * RGBc[1] + JC * img[i, j, 1].astype(np.float16) / 255
+                imgEnhanced[i, j, 2] = (1-JC) * RGBc[0] + JC * img[i, j, 0].astype(np.float16) / 255
 
         ## Show Results
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)

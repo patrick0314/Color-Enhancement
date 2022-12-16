@@ -40,9 +40,9 @@ if __name__ == '__main__':
                     xyz = np.matmul(Ml, np.array([bgr[2]**gamma_rl, bgr[1]**gamma_gl, bgr[0]**gamma_bl]))
                     # Chnage to RGB with Full-backlight Dispaly Model
                     xyzinv = np.matmul(np.linalg.inv(Mf), xyz)
-                    bgr[0] = xyzinv[2] ** (1 / gamma_bl)
-                    bgr[1] = xyzinv[1] ** (1 / gamma_bl)
-                    bgr[2] = xyzinv[0] ** (1 / gamma_bl)
+                    bgr[0] = xyzinv[2] ** (1 / gamma_bf)
+                    bgr[1] = xyzinv[1] ** (1 / gamma_gf)
+                    bgr[2] = xyzinv[0] ** (1 / gamma_rf)
 
                     imgDim[i, j, :] = (bgr * 255).astype(np.uint8)
             
