@@ -16,6 +16,8 @@ Use SLIC to segment the image into few groups. This is because we think that #ve
 
 From below figure, We can see that when `a` gets larger, the curve become more bending. We wants that the bright parts of image don't change too much and the dark parts of image change much more. We use mean color of SLIC segmentation as sample and throw it to the method of #version 1 to get lightness `J` and chroma `C`. Set `a = 10000 / np.sqrt(J*C)`. Under this circumstance, we can see that the performance become better due the adaptation of this method.
 
+![網頁擷取_16-12-2022_234912_www desmos com](https://user-images.githubusercontent.com/47914151/208136409-f86bb49d-f412-49d7-9028-c435c48893d2.jpeg)
+
 ## Requirement
 
 ```
