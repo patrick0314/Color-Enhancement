@@ -4,11 +4,6 @@ import sys
 import cv2
 import numpy as np
 
-
-def DeviceCharacteristicModeling(M, R, gr, gg, gb):
-    res = np.matmul(M, np.array([R[2]**gr, R[1]**gg, R[0]**gb]))
-    return res
-    
 if __name__ == '__main__':
     np.seterr(invalid='ignore')
 
@@ -27,11 +22,8 @@ if __name__ == '__main__':
 
     fileDic = {}
     for file in allFiles:
-        print(file)
         if file[:2] not in fileDic: fileDic[file[:2]] = [file]
         else: fileDic[file[:2]].append(file)
-    print(fileDic)
-    sys.exit()
 
     for files in fileDic.keys():
         print('=== start', files, 'image ===')
@@ -45,7 +37,7 @@ if __name__ == '__main__':
                 for j in range(n):
                     # Change to XYZ with Low-backlight Display Model
                     bgr = img[i, j, :].astype(np.float16) / 255
-                    xyz = DeviceCharacteristicModeling(Ml, bgr, gamma_rl, gamma_gl, gamma_bl)
+                    xyz = np.matmul(Ml, np.array([bgr[2]**gamma_rl, bgr[1]**gamma_gl, bgr[0]**gamma_bl]))
                     # Chnage to RGB with Full-backlight Dispaly Model
                     xyzinv = np.matmul(np.linalg.inv(Mf), xyz)
                     bgr[0] = xyzinv[2] ** (1 / gamma_bl)
@@ -55,6 +47,8 @@ if __name__ == '__main__':
                     imgDim[i, j, :] = (bgr * 255).astype(np.uint8)
             
             res = cv2.vconcat([img, imgDim])
+            res = np.pad(res, ((30, 0), (0, 0), (0, 0)), 'constant', constant_values=255)
+            cv2.putText(res, file[3:-4], (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1, cv2.LINE_AA)
         
             if first: ress = res; first = False
             else: ress = cv2.hconcat([ress, res])

@@ -5,8 +5,6 @@ import time
 import cv2
 import numpy as np
 
-from ciecam import CIECAM02
-
 if __name__ == '__main__':
     np.seterr(invalid='ignore')
 

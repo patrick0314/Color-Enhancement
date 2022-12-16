@@ -1,6 +1,4 @@
 import numpy as np
-from colour.algebra import sdiv, sdiv_mode
-from colour.utilities import as_float_array, ones, tsplit, tstack, zeros
 
 
 def opponent_colour_dimensions_inverse(P_n, h):
@@ -10,83 +8,39 @@ def opponent_colour_dimensions_inverse(P_n, h):
 
     Parameters
     ----------
-    P_n
-        Points :math:`P_n`.
-    h
-        Hue :math:`h` in degrees.
+    P_n: Points :math:`P_n`.
+    h: Hue :math:`h` in degrees.
 
     Returns
     -------
-    :class:`numpy.ndarray`
-        Opponent colour dimensions.
-
-    Examples
-    --------
-    >>> P_n = np.array([30162.89081534, 24.23720547, 1.05000000])
-    >>> h = -140.95156734
-    >>> opponent_colour_dimensions_inverse(P_n, h)  # doctest: +ELLIPSIS
-    array([-0.0006241..., -0.0005062...])
+    :class:`numpy.ndarray`, Opponent colour dimensions.
     """
 
-    P_1, P_2, P_3 = tsplit(P_n)
+    P_1, P_2, P_3 = P_n[0], P_n[1], P_n[2]
     hr = np.radians(h)
 
     sin_hr = np.sin(hr)
     cos_hr = np.cos(hr)
+    cos_hr_sin_hr = cos_hr / sin_hr
+    sin_hr_cos_hr = sin_hr / cos_hr
 
-    with sdiv_mode():
-        cos_hr_sin_hr = sdiv(cos_hr, sin_hr)
-        sin_hr_cos_hr = sdiv(sin_hr, cos_hr)
-
-        P_4 = sdiv(P_1, sin_hr)
-        P_5 = sdiv(P_1, cos_hr)
+    P_4 = P_1 / sin_hr
+    P_5 = P_1 / cos_hr
 
     n = P_2 * (2 + P_3) * (460 / 1403)
 
-    a = zeros(hr.shape)
-    b = zeros(hr.shape)
+    a = np.zeros(hr.shape)
+    b = np.zeros(hr.shape)
 
     abs_sin_hr_gt_cos_hr = np.abs(sin_hr) >= np.abs(cos_hr)
     abs_sin_hr_lt_cos_hr = np.abs(sin_hr) < np.abs(cos_hr)
 
-    b = np.where(
-        abs_sin_hr_gt_cos_hr,
-        n
-        / (
-            P_4
-            + (2 + P_3) * (220 / 1403) * cos_hr_sin_hr
-            - (27 / 1403)
-            + P_3 * (6300 / 1403)
-        ),
-        b,
-    )
+    b = np.where(abs_sin_hr_gt_cos_hr, n / (P_4 + (2 + P_3) * (220 / 1403) * cos_hr_sin_hr - (27 / 1403) + P_3 * (6300 / 1403)), b)
+    a = np.where(abs_sin_hr_gt_cos_hr, b * cos_hr_sin_hr, a)
+    a = np.where(abs_sin_hr_lt_cos_hr, n / (P_5 + (2 + P_3) * (220 / 1403) - ((27 / 1403) - P_3 * (6300 / 1403)) * sin_hr_cos_hr), a)
+    b = np.where(abs_sin_hr_lt_cos_hr, a * sin_hr_cos_hr, b)
 
-    a = np.where(
-        abs_sin_hr_gt_cos_hr,
-        b * cos_hr_sin_hr,
-        a,
-    )
-
-    a = np.where(
-        abs_sin_hr_lt_cos_hr,
-        n
-        / (
-            P_5
-            + (2 + P_3) * (220 / 1403)
-            - ((27 / 1403) - P_3 * (6300 / 1403)) * sin_hr_cos_hr
-        ),
-        a,
-    )
-
-    b = np.where(
-        abs_sin_hr_lt_cos_hr,
-        a * sin_hr_cos_hr,
-        b,
-    )
-
-    ab = tstack([a, b])
-
-    return ab
+    return np.array([a, b])
 
 def P(N_c, N_cb, e_t, t, A, N_bb):
     """
@@ -94,52 +48,22 @@ def P(N_c, N_cb, e_t, t, A, N_bb):
 
     Parameters
     ----------
-    N_c
-        Surround chromatic induction factor :math:`N_{c}`.
-    N_cb
-        Chromatic induction factor :math:`N_{cb}`.
-    e_t
-        Eccentricity factor :math:`e_t`.
-    t
-        Temporary magnitude quantity :math:`t`.
-    A
-        Achromatic response  :math:`A` for the stimulus.
-    N_bb
-        Chromatic induction factor :math:`N_{bb}`.
+    N_c: Surround chromatic induction factor :math:`N_{c}`.
+    N_cb: Chromatic induction factor :math:`N_{cb}`.
+    e_t: Eccentricity factor :math:`e_t`.
+    t: Temporary magnitude quantity :math:`t`.
+    A: Achromatic response  :math:`A` for the stimulus.
+    N_bb: Chromatic induction factor :math:`N_{bb}`.
 
     Returns
     -------
-    :class:`numpy.ndarray`
-        Points :math:`P`.
-
-    Examples
-    --------
-    >>> N_c = 1.0
-    >>> N_cb = 1.00030400456
-    >>> e_t = 1.174005472851914
-    >>> t = 0.149746202921
-    >>> A = 23.9394809667
-    >>> N_bb = 1.00030400456
-    >>> P(N_c, N_cb, e_t, t, A, N_bb)  # doctest: +ELLIPSIS
-    array([  3.0162890...e+04,   2.4237205...e+01,   1.0500000...e+00])
+    :class:`numpy.ndarray`, Points :math:`P`.
     """
-
-    N_c = as_float_array(N_c)
-    N_cb = as_float_array(N_cb)
-    e_t = as_float_array(e_t)
-    t = as_float_array(t)
-    A = as_float_array(A)
-    N_bb = as_float_array(N_bb)
-
-    with sdiv_mode():
-        P_1 = sdiv((50000 / 13) * N_c * N_cb * e_t, t)
-
+    P_1 = (50000 / 13) * N_c * N_cb * e_t / t
     P_2 = A / N_bb + 0.305
-    P_3 = ones(P_1.shape) * (21 / 20)
+    P_3 = np.ones(P_1.shape) * (21 / 20)
 
-    P_n = tstack([P_1, P_2, P_3])
-
-    return P_n
+    return np.array([P_1, P_2, P_3])
 
 class CIECAM02(object):
     """

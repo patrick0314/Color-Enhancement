@@ -7,7 +7,6 @@ import numpy as np
 
 from ciecam import CIECAM02, P, opponent_colour_dimensions_inverse
 
-
 if __name__ == '__main__':
     np.seterr(invalid='ignore')
     
