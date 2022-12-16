@@ -41,8 +41,9 @@ opencv-python==4.6.0.66
 
 The left-most row are the original image and its dim backlight version. The second are is the proposed results of ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). The 3rd row are our implement of ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). The 4th row are the implement of tone and color correction. And the last row are the implement of SLIC + tone and color correction + ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421)
 
-![01](https://user-images.githubusercontent.com/47914151/208130145-9a423faf-cbd8-464c-8457-48bc706adb7c.png)
+![01](https://user-images.githubusercontent.com/47914151/208147535-d9b7dca3-068b-46c9-ba7b-2c08945c3317.png)
 
-![06](https://user-images.githubusercontent.com/47914151/208130162-6adfab73-7c10-454b-b6d4-11ee34b63f33.png)
+![06](https://user-images.githubusercontent.com/47914151/208147614-00b3ed54-1852-41b2-9dbf-363a331f09ed.png)
 
-![09](https://user-images.githubusercontent.com/47914151/208130293-c2f99d42-79e1-4c33-adc3-ed5b1b456b25.png)
+![11](https://user-images.githubusercontent.com/47914151/208148142-de2d1b67-b47f-49f4-9262-69b1d2a86c9d.png)
+
