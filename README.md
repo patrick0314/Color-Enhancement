@@ -21,8 +21,8 @@ The left-most row are the original image and its dim backlight version. The seco
 for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). The third row are our implement of ["Exploiting Perceptual Anchoring
 for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). And the last row are the implement of tone and color correction.
 
-![01](https://user-images.githubusercontent.com/47914151/208058071-81d5e8dc-3a24-4678-a145-5acf356e2334.png)
+![01](https://user-images.githubusercontent.com/47914151/208063921-132bb8cf-c977-474a-8d41-77d00bba61a9.png)
 
-![06](https://user-images.githubusercontent.com/47914151/208057960-00d631b5-030f-4ddf-899c-47b94ef75feb.png)
+![06](https://user-images.githubusercontent.com/47914151/208063937-7d7ffd08-2584-49dd-8887-0c0a7bca3f23.png)
 
-![09](https://user-images.githubusercontent.com/47914151/208058170-c31e4a86-415e-457a-8fa3-8fd204f1cf77.png)
+![09](https://user-images.githubusercontent.com/47914151/208063955-dbae087f-404b-49e3-887f-4a08da1aa816.png)
