@@ -34,6 +34,9 @@ if __name__ == '__main__':
         img = img.astype(np.float64) / 255
 
         segments = slic(img, n_segments=5, sigma=5)
+        segmentation = mark_boundaries((img*255).astype(np.uint8), segments)
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_SLIC'+file[-4:]), segmentation*255)
+
         imgEnhanced = np.zeros(img.shape, dtype=np.float64)
         for idx in range(1, np.max(segments)+1):
             sampleImg = np.ones(img.shape, dtype=np.float64)
@@ -71,8 +74,7 @@ if __name__ == '__main__':
 
         imgEnhanced *= 255
         imgEnhanced = imgEnhanced.astype(np.uint8)
-        res = mark_boundaries(imgEnhanced, segments)
 
-        cv2.imwrite(os.path.join(outDir, file[:2]+'_v3'+file[-4:]), res*255)
+        cv2.imwrite(os.path.join(outDir, file[:2]+'_v3'+file[-4:]), imgEnhanced)
         endTime = time.time()
         print('cost:', endTime-startTime, 'sec')

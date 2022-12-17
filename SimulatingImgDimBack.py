@@ -22,6 +22,11 @@ if __name__ == '__main__':
 
     fileDic = {}
     for file in allFiles:
+        if 'ori' in file: pass
+        elif 'propose' in file: pass
+        elif 'v2' in file: pass
+        elif 'v3' in file: pass
+        else: continue
         if file[:2] not in fileDic: fileDic[file[:2]] = [file]
         else: fileDic[file[:2]].append(file)
 
@@ -54,5 +59,5 @@ if __name__ == '__main__':
             else: ress = cv2.hconcat([ress, res])
 
         # Save Results
-        outPath = os.path.join(outDir, file[:2]+file[-4:])
+        outPath = os.path.join(outDir, file[:2]+'v3'+file[-4:])
         cv2.imwrite(outPath, ress)

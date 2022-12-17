@@ -23,7 +23,7 @@ if __name__ == '__main__':
         imgEnhanced = img.copy()
 
         JC = 0.2
-        a = 7
+        a = 8
         imgEnhanced[:, :, 0] = (1-JC) * np.log((a-1)*imgEnhanced[:, :, 0]+1) / np.log(a) + JC * img[:, :, 0]
         imgEnhanced[:, :, 1] = (1-JC) * np.log((a-1)*imgEnhanced[:, :, 1]+1) / np.log(a) + JC * img[:, :, 1]
         imgEnhanced[:, :, 2] = (1-JC) * np.log((a-1)*imgEnhanced[:, :, 2]+1) / np.log(a) + JC * img[:, :, 2]
