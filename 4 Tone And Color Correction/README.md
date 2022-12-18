@@ -1,8 +1,6 @@
 # Tone and Color Correction + SLIC + CIECAM02
 
-1. Use tone and color correction with the function `log((a-1)*img+1]) / log(a)` where `a` is a constant to modify the image.
-
-  We can see that this method exactly enhances the image with dim backlight. However, in the bright part of image, color become too bright and not the same  color from our perspective. This is because the fixed parameter `a`. If we set `a` too large, the bright part of image would become all white; on the other hand, if we set `a` too small, the dark part would not enhance enough.
+1. Use tone and color correction with the function `log((a-1)*img+1]) / log(a)` where `a` is a constant to modify the image. We can see that this method exactly enhances the image with dim backlight. However, in the bright part of image, color become too bright and not the same  color from our perspective. This is because the fixed parameter `a`. If we set `a` too large, the bright part of image would become all white; on the other hand, if we set `a` too small, the dark part would not enhance enough.
   
 ![網頁擷取_16-12-2022_234912_www desmos com](https://user-images.githubusercontent.com/47914151/208136409-f86bb49d-f412-49d7-9028-c435c48893d2.jpeg)
 
