@@ -22,11 +22,7 @@ if __name__ == '__main__':
 
     fileDic = {}
     for file in allFiles:
-        if 'ori' in file: pass
-        elif 'propose' in file: pass
-        elif 'v2' in file: pass
-        elif 'v3' in file: pass
-        else: continue
+        if 'SLIC' in file: continue
         if file[:2] not in fileDic: fileDic[file[:2]] = [file]
         else: fileDic[file[:2]].append(file)
 
