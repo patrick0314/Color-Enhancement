@@ -1,22 +1,14 @@
-# Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement
+# Tone and Color Correction + SLIC + CIECAM02
 
-## [Version 1](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/NaturalImgEnhanced.py)
+1. Use tone and color correction with the function `log((a-1)*img+1]) / log(a)` where `a` is a constant to modify the image.
 
-According to ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421), we follow the step in the paper and implement it.
-
-## [Version 2](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/ToneAndColorCorrection.py)
-
-Use tone and color correction with the function `log((a-1)*img+1]) / log(a)` where `a` is a constant to modify the image.
-
-We can see that this method exactly enhances the image with dim backlight. However, in the bright part of image, color become too bright and not the same color from our perspective.
-
-## [Version 3](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/SLIC.py)
-
-Use SLIC to segment the image into few groups. This is because we think that #version 2 could not get the good performance due to its constant parameter. Therefore, we modify the parameter `a` into adaptation.
-
-From below figure, We can see that when `a` gets larger, the curve become more bending. We wants that the bright parts of image don't change too much and the dark parts of image change much more. We use mean color of SLIC segmentation as sample and throw it to the method of #version 1 to get lightness `J` and chroma `C`. Set `a = 10000 / np.sqrt(J*C)`. Under this circumstance, we can see that the performance become better due the adaptation of this method.
-
+  We can see that this method exactly enhances the image with dim backlight. However, in the bright part of image, color become too bright and not the same  color from our perspective. This is because the fixed parameter `a`. If we set `a` too large, the bright part of image would become all white; on the other hand, if we set `a` too small, the dark part would not enhance enough.
+  
 ![網頁擷取_16-12-2022_234912_www desmos com](https://user-images.githubusercontent.com/47914151/208136409-f86bb49d-f412-49d7-9028-c435c48893d2.jpeg)
+
+2. We think that the dark part of images will in the same area and the bright part of images will in other same area. Therefore, we use SLIC to segment the image into few groups. By this, we can use different parameter `a` to modify images under different lightness.
+
+3. We use the mean color value of the segmented groups as sample color and throw it into CIECAM02 model to calculate lightness $J$ and chroma $C$. This is because we think these two parameter can represent lightness of groups. Set `a = np.sqrt(1 / J*C)`. Under this circumstance, we can see that the performance become better due the adaptation of parameter `a`.
 
 ## Requirement
 
@@ -27,23 +19,22 @@ opencv-python==4.6.0.66
 
 ## Usage
 
-* [ColorPatchEnhanced.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/ColorPatchEnhanced.py) implement color enhancement on input data folder - [color patch](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/color%20patch) and save the results with name `v1` in the folder - [color patch results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/color%20patch%20results)
+* [ToneAndColorCorrection.py](https://github.com/patrick0314/DIP-Final-Project/blob/main/4%20Tone%20And%20Color%20Correction/ToneAndColorCorrection.py) implement Tone and Color Correction on input data folder - [natural image](https://github.com/patrick0314/DIP-Final-Project/tree/main/4%20Tone%20And%20Color%20Correction/images/natural%20image) and save the results with name `XX_v2.png` in the folder - [natural image results](https://github.com/patrick0314/DIP-Final-Project/tree/main/4%20Tone%20And%20Color%20Correction/images/natural%20image%20results)
 
-* [NaturalImgEnhanced.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/NaturalImgEnhanced.py) implement **method 1** color enhancement on input data folder - [natural image](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image) and save the results with name `v1` in the folder - [natural image results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image%20results)
+* [SLIC.py](https://github.com/patrick0314/DIP-Final-Project/blob/main/4%20Tone%20And%20Color%20Correction/SLIC.py) implement Tone and Color Correction + SLIC + CIECAM02 model on input data folder - [natural image](https://github.com/patrick0314/DIP-Final-Project/tree/main/4%20Tone%20And%20Color%20Correction/images/natural%20image) and save the results with name `XX_v3.png` in the folder - [natural image results](https://github.com/patrick0314/DIP-Final-Project/tree/main/4%20Tone%20And%20Color%20Correction/images/natural%20image%20results)
 
-* [ToneAndColorCorrection.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/NaturalImgEnhanced.py) implement **method 2** color enhancement on input data folder - [natural image](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image) and save the results with name `v2` in the folder - [natural image results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image%20results)
-
-* [SLIC.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/NaturalImgEnhanced.py) implement **method 3** color enhancement on input data folder - [natural image](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image) and save the results with name `v3` in the folder - [natural image results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/natural%20image%20results)
-
-* [SimulatingImgDimBack.py](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/blob/main/SimulatingImgDimBack.py) can show the comparison between original img & the img with dim backlight and save the results in the folder - [results](https://github.com/patrick0314/Exploiting-Perceptual-Anchoring-for-Color-Image-Enhancement/tree/main/images/results)
+* [SimulatingImgDimBack.py](https://github.com/patrick0314/DIP-Final-Project/blob/main/4%20Tone%20And%20Color%20Correction/SimulatingImgDimBack.py) can show the comparison between original img & the img with dim backlight and save the results in the folder - [results](https://github.com/patrick0314/DIP-Final-Project/tree/main/4%20Tone%20And%20Color%20Correction/images/results)
 
 ## Results
 
-The left-most row are the original image and its dim backlight version. The second are is the proposed results of ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). The 3rd row are our implement of ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421). The 4th row are the implement of tone and color correction. And the last row are the implement of SLIC + tone and color correction + ["Exploiting Perceptual Anchoring for Color Image Enhancement"](https://ieeexplore.ieee.org/document/7337421)
+The left part of images are original images. The second part of images are the ground truth of Exploiting Perceptual Anchoring for Color Image Enhancement. The third part of images are the results of Tone and Color Correction. And the right part of images are the proposed results of our method.
 
-![01](https://user-images.githubusercontent.com/47914151/208147535-d9b7dca3-068b-46c9-ba7b-2c08945c3317.png)
+![01v3](https://user-images.githubusercontent.com/47914151/208276108-2355a0ed-c256-4c33-b18b-821ff6a4671a.png)
 
-![06](https://user-images.githubusercontent.com/47914151/208147614-00b3ed54-1852-41b2-9dbf-363a331f09ed.png)
+![03v3](https://user-images.githubusercontent.com/47914151/208276117-27a125d1-bb38-40ab-ad17-44a45426f2c5.png)
 
-![11](https://user-images.githubusercontent.com/47914151/208148142-de2d1b67-b47f-49f4-9262-69b1d2a86c9d.png)
+![04v3](https://user-images.githubusercontent.com/47914151/208276120-b60c953e-9307-41c6-8299-9b75801af6a3.png)
 
+![06v3](https://user-images.githubusercontent.com/47914151/208276124-d4466669-e468-4478-9959-fc6c5a3d00e6.png)
+
+![11v3](https://user-images.githubusercontent.com/47914151/208276129-c17201b0-93bb-4b7c-9165-9c8e402e78d3.png)
