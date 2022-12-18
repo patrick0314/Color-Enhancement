@@ -19,7 +19,7 @@ We can divide our project into saveral parts:
   
   ```
   cd ./2 Gamma Correction/
-  python charles_test.py
+  python gamma_test.py
   python SimulatingDimBack.py
   ```
   
