@@ -35,8 +35,8 @@ if __name__ == '__main__':
                 xyz = DeviceCharacteristicModeling(Ml, bgr, gamma_rl, gamma_gl, gamma_bl)
                 # Change to RGB with Full-backlight Dispaly Model
                 xyzinv = np.matmul(np.linalg.inv(Mf), xyz)
-                bgr[0] = xyzinv[2] ** (1 / gamma_bl)
-                bgr[1] = xyzinv[1] ** (1 / gamma_bl)
+                bgr[0] = xyzinv[2] ** (1 / gamma_rl)
+                bgr[1] = xyzinv[1] ** (1 / gamma_gl)
                 bgr[2] = xyzinv[0] ** (1 / gamma_bl)
 
                 imgDim[i, j, :] = (bgr * 255).astype(np.uint8)
