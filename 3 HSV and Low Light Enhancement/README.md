@@ -1,4 +1,4 @@
-# Color-Image-Enhancement
+# HSV and Low Light Enhancement
 ## [Method](https://github.com/justaneater/Color-Image-Enhancement/blob/main/HSV_enhancement.m)
 
 ## Usage
