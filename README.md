@@ -31,3 +31,12 @@ We can divide our project into saveral parts:
   run Low_light_enhancement.m
   run Dim_BackLight.m
   ```
+  
+  4. **Color Correction + SLIC + CIECAM02 :** Last, we attempt another method - Tone and Color Correction. Based on our acknowledgement domain, we adopt SLIC + CIECAM02 to modify Tone and Color Correction and derive the results which we think better than original ones. The details can be seen in the [README](https://github.com/patrick0314/DIP-Final-Project/blob/main/4%20Tone%20And%20Color%20Correction/README.md)
+  
+  ```
+  cd ./4 Tone And Color Correction/
+  python ToneAndColorCorrection.py
+  python SLIC.py
+  python SimulatingImgDimBack.py
+  ```
