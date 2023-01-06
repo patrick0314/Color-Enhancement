@@ -1,4 +1,4 @@
-# DIP Final Project
+# Color Enhancement
 
 We can divide our project into saveral parts: 
 
